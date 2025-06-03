@@ -10,9 +10,6 @@ operacoes = ["Somar", "Subtrair", "Multiplicar", "Dividir", "Contar", "Contagem 
 st.set_page_config(page_title='Relatório Dinâmico', layout="wide")
 
 st.markdown("<h1 style='text-align:center;font-size:80px; color:#006666; margin:2rem 0rem;'>📊 Relatório Dinâmico</h1>", unsafe_allow_html=True)
-st.markdown("---")
-# Aviso
-st.markdown("<h3 style='text-align:left;font-size:18px; color:red; margin:0rem 0rem;'>Deve-se garantir que, em todos os arquivos, a primeira linha seja o cabeçalho.</h3>", unsafe_allow_html=True)
 
 # Nome etapa
 st.markdown("<h3 style='text-align:left;font-size:28px; color:#005654; margin:0rem 0rem;'>📂 Envie o arquivo Principal</h3>", unsafe_allow_html=True)
@@ -80,23 +77,37 @@ if df_mae is not None:
                             col_ops[col] = op
                             novos_nomes[col] = novo_nome
 
-                        st.markdown("🎯 **Filtro opcional**")
-                        col_filtro = st.selectbox("Coluna para aplicar filtro", ["Nenhum"] + sorted(df_filho.columns.tolist()), key=f"filtro_col_{i}_{j}")
+                        st.markdown("🎯 **Filtros opcionais**")
 
                         df_filtrado = df_filho.copy()
 
-                        if col_filtro != "Nenhum":
-                            valores_unicos = df_filtrado[col_filtro].dropna().unique().tolist()
-                            valores_selecionados = st.multiselect(f"Selecione os valores da coluna '{col_filtro}'", valores_unicos, key=f"filtro_vals_{i}_{j}")
-                            if valores_selecionados:
-                                df_filtrado = df_filtrado[df_filtrado[col_filtro].isin(valores_selecionados)]
+                        # Caixa para definir quantos filtros quer aplicar
+                        num_filtros = st.number_input("Quantos filtros deseja aplicar?", min_value=0, max_value=10, value=1, key=f"num_filtros_{i}_{j}")
 
+                        # Loop sobre a quantidade de filtros
+                        for n in range(num_filtros):
+                            st.markdown(f"**Filtro {n + 1}**")
+                            col_filtro = st.selectbox(f"Coluna para aplicar o filtro {n + 1}", ["Nenhum"] + sorted(df_filho.columns.tolist()), key=f"filtro_col_{i}_{j}_{n}")
+                            
+                            if col_filtro != "Nenhum":
+                                valores_unicos = df_filtrado[col_filtro].dropna().unique().tolist()
+                                valores_selecionados = st.multiselect(
+                                    f"Selecione os valores da coluna '{col_filtro}'", 
+                                    valores_unicos, 
+                                    key=f"filtro_vals_{i}_{j}_{n}"
+                                )
+                                if valores_selecionados:
+                                    df_filtrado = df_filtrado[df_filtrado[col_filtro].isin(valores_selecionados)]
+
+                        # Após aplicar todos os filtros, segue a agregação
                         if col_chave in df_filtrado.columns and col_ops:
                             def agg_func(x):
                                 result = {}
                                 for col, oper in col_ops.items():
                                     result[novos_nomes[col]] = aplicar_operacao(x[col], oper)
                                 return pd.Series(result)
+
+
 
                             agrupado = df_filtrado.groupby(col_chave).apply(agg_func).reset_index()
                             agrupado = agrupado.rename(columns={col_chave: "CHAVE_MERGE"})
@@ -172,8 +183,7 @@ if df_mae is not None:
                             elif oper == "Porcentagem":
                                 #st.session_state.df_nova_col[novo_nome] = (serieA / serieB.replace(0, pd.NA)) * 100
                                 resultado = (serieA / serieB.replace(0, pd.NA)) * 100
-                                st.session_state.df_nova_col[novo_nome] = resultado.astype(str) + '%'
-
+                                st.session_state.df_nova_col[novo_nome] = resultado.round(1).astype('int64').astype(str) + '%'
 
                             st.success(f"✅ Coluna '{novo_nome}' criada com sucesso!")
                             st.session_state.contador_operacoes += 1
