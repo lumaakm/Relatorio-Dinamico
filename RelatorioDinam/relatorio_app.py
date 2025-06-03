@@ -12,7 +12,7 @@ st.set_page_config(page_title='Relatório Dinâmico', layout="wide")
 st.markdown("<h1 style='text-align:center;font-size:80px; color:#006666; margin:2rem 0rem;'>📊 Relatório Dinâmico</h1>", unsafe_allow_html=True)
 st.markdown("---")
 # Aviso
-st.markdown("<h3 style='text-align:left;font-size:24px; color:red; margin:0rem 0rem;'>Deve-se garantir que, em todos os arquivos, a primeira linha seja o cabeçalho.</h3>", unsafe_allow_html=True)
+st.markdown("<h3 style='text-align:left;font-size:18px; color:red; margin:0rem 0rem;'>Deve-se garantir que, em todos os arquivos, a primeira linha seja o cabeçalho.</h3>", unsafe_allow_html=True)
 
 # Nome etapa
 st.markdown("<h3 style='text-align:left;font-size:28px; color:#005654; margin:0rem 0rem;'>📂 Envie o arquivo Principal</h3>", unsafe_allow_html=True)
